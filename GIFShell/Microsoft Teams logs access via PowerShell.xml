@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ruleMetadata>
+    <guid>fcc56a5e-f28a-4b94-8911-2ecada4a0e93</guid>
+    <isInternal>false</isInternal>
+    <rule>
+        <definition>
+            <Process>
+                <operator type="OR">
+                    <condition component="FileItem" property="FileNameWithoutExtension" condition="is" value="powershell" />
+                    <condition component="Module" condition="is" property="OriginalFileName" value="powershell.exe" />
+                </operator>
+            </Process>
+            <operations>
+                <operation type="Scripts">
+                    <operator type="or">
+                        <condition component="Scripts" property="Script" condition="starts" value="Get-Content " />
+                        <condition component="Scripts" property="Script" condition="contains" value=" Get-Content " />
+                        <condition component="Scripts" property="Script" condition="contains" value="|Get-Content " />
+                        <condition component="Scripts" property="Script" condition="starts" value="Get-ChildItem " />
+                        <condition component="Scripts" property="Script" condition="contains" value=" Get-ChildItem " />
+                        <condition component="Scripts" property="Script" condition="contains" value="|Get-ChildItem " />
+                    </operator>
+                </operation>
+                <operation type="ReadFile">
+                    <operator type="and">
+                        <condition component="FileItem" property="Path" condition="is" value="%APPDATA%\Microsoft\Teams\" />
+                        <condition component="FileItem" property="Extension" condition="is" value="log" />
+                    </operator>
+                </operation>
+            </operations>
+        </definition>
+        <maliciousProcess process="current" />
+        <actions>
+            <action name="TriggerDetection" />
+            <action name="StoreEvent" />
+        </actions>
+        <description>
+            <os>Windows</os>
+            <name>Microsoft Teams logs access via PowerShell</name>
+            <category>Discovery</category>
+            <explanation>
+                Attackers attempt to plant malicious URLs for GIF images in the Microsoft Teams logs file.
+                Monitored is following operating system utility executed
+                from PowerShell: Get-Content, Get-ChildItem
+            </explanation>
+            <maliciousCauses>
+                Microsoft Teams logs information leak or malware staging. See https://medium.com/@bobbyrsec/gifshell-covert-attack-chain-and-c2-utilizing-microsoft-teams-gifs-1618c4e64ed7
+            </maliciousCauses>
+            <benignCauses>
+                User or Administrator reads the Microsoft Teams logs file via PowerShell.
+            </benignCauses>
+            <recommendedActions>
+                1. Querying the Microsoft Teams log is an atomic operation only. Check other activities on the computer.
+            </recommendedActions>
+            <severity>50</severity>
+        </description>
+    </rule>
+</ruleMetadata>
