@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ruleMetadata>
+    <guid>0c805993-e4ca-46cc-b9e4-70c8deb87178</guid>
+    <isInternal>false</isInternal>
+    <rule>
+        <description>
+            <os>Windows</os>
+            <explanation>Windows PowerShell is used to send a Microsoft Teams card to a webhook connecter.</explanation>
+            <maliciousCauses>May be used by script malware for exfiltrating command results</maliciousCauses>
+            <benignCauses>Benign examples include various user/administrator scripts to share content in Teams channels.</benignCauses>
+            <recommendedActions>1. Look for a PowerShell script that initiated the connection.
+                2. Examine the request payload for a Teams Card
+                3. Check the JSON payload of the card sent to the webhook URL for a suspicious GIF image, possibly with a base64-encoded name, being requested from an untrusted host.
+                4. If a suspicious GIF image is detected, start the incident response process (for example, disconnect the computer from the internet, update your antivirus product and scan the computer for malware, send samples for analysis, block module, etc.).</recommendedActions>
+            <category>Communication</category>
+            <name>Powershell script connects to a Microsoft Teams Webhook</name>
+            <severity>50</severity>
+        </description>
+        <definition>
+            <process>
+                <operator type="and">
+                    <operator type="OR">
+                        <condition component="FileItem" condition="is" property="FileNameWithoutExtension" value="powershell" />
+                        <condition component="Module" property="OriginalFileName" condition="is" value="powershell.exe" />
+                    </operator>
+                </operator>
+            </process>
+            <operations>
+                <operation type="Scripts">
+                    <operator type="and">
+                        <condition component="Scripts" property="Script" condition="contains" value="Invoke-RestMethod" />
+                        <condition component="Scripts" property="Script" condition="contains" value="webhook.office.com" />
+                    </operator>
+                </operation>
+            </operations>
+        </definition>
+        <maliciousProcess process="current" />
+        <actions>
+            <action name="TriggerDetection" />
+            <action name="StoreEvent" />
+        </actions>
+    </rule>
+</ruleMetadata>
